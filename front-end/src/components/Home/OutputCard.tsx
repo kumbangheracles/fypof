@@ -12,9 +12,8 @@ interface Props {
 }
 
 export function OutputCard({ output, loading, error }: Props) {
-  if (!output && !loading && !error) return null;
-
   const [isCopy, setIsCopy] = useState<boolean>(false);
+  if (!output && !loading && !error) return null;
 
   async function copyToClipboard() {
     if (!output) return;
