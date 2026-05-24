@@ -4,32 +4,34 @@ import bodyParser from "body-parser";
 import db from "./utils/database";
 import docs from "./docs/route";
 import cors from "cors";
-async function init() {
-  try {
-    const result = await db();
+
+const app = express();
+
+app.use(cors());
+app.use(bodyParser.json());
+
+app.get("/", (req, res) => {
+  res.status(200).json({
+    message: "Server is running",
+    data: "null",
+  });
+});
+
+app.use("/api", router);
+docs(app);
+
+// koneksi DB dijalankan saat module di-load
+db()
+  .then((result) => {
     console.log("Database status: ", result);
-    const app = express();
+  })
+  .catch((error) => {
+    console.error("Database connection failed: ", error);
+  });
 
-    app.use(cors());
-    app.use(bodyParser.json());
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
+});
 
-    app.get("/", (req, res) => {
-      res.status(200).json({
-        message: "Server is running",
-        data: "null",
-      });
-    });
-    const PORT = 3001;
-
-    app.use("/api", router);
-
-    docs(app);
-    app.listen(PORT, () => {
-      console.log(`Server is running on http://localhost:${PORT}`);
-    });
-  } catch (error) {
-    console.log(error);
-  }
-}
-
-init();
+export default app;
