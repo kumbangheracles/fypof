@@ -13,6 +13,7 @@ interface Props {
 
 export function OutputCard({ output, loading, error }: Props) {
   const [isCopy, setIsCopy] = useState<boolean>(false);
+  const { appearance } = useAppearance();
   if (!output && !loading && !error) return null;
 
   async function copyToClipboard() {
@@ -20,7 +21,6 @@ export function OutputCard({ output, loading, error }: Props) {
     await navigator.clipboard.writeText(output);
     setIsCopy(true);
   }
-  const { appearance } = useAppearance();
 
   const isDark = appearance === "dark";
 
