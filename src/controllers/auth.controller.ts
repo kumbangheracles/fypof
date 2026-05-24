@@ -1,15 +1,17 @@
 import { Request, Response } from "express";
 import * as Yup from "yup";
-import UserModel from "../models/user.model";
 import { encrypt } from "../utils/encryption";
 import { generateToken } from "../utils/jwt";
 import { IReqUser } from "../middlewares/auth.middleware";
+import { registerValidateSchema } from "../validation/auth.validation";
+import prisma from "../utils/prisma";
 type TRegister = {
   fullName: string;
   username: string;
   email: string;
   password: string;
   confirmPassword: string;
+  phoneNumber: string;
 };
 
 type TLogin = {
@@ -17,19 +19,16 @@ type TLogin = {
   password: string;
 };
 
-const registerValidateSchema = Yup.object({
-  fullName: Yup.string().required(),
-  username: Yup.string().required(),
-  email: Yup.string().email().required(),
-  password: Yup.string().required(),
-  confirmPassword: Yup.string()
-    .required()
-    .oneOf([Yup.ref("password")], "Password not match"),
-});
 export default {
   async register(req: Request, res: Response) {
-    const { fullName, username, email, password, confirmPassword } =
-      req.body as unknown as TRegister;
+    const {
+      fullName,
+      username,
+      email,
+      password,
+      confirmPassword,
+      phoneNumber,
+    } = req.body as unknown as TRegister;
 
     try {
       await registerValidateSchema.validate({
@@ -38,13 +37,11 @@ export default {
         email,
         password,
         confirmPassword,
+        phoneNumber,
       });
-
-      const result = await UserModel.create({
-        fullName,
-        username,
-        email,
-        password,
+      const hashedPassword = encrypt(password);
+      const result = await prisma.user.create({
+        data: { fullName, username, email, password: hashedPassword },
       });
       res.status(200).json({
         message: "Success Registration!",
@@ -71,15 +68,10 @@ export default {
      */
     const { identifier, password } = req.body as unknown as TLogin;
     try {
-      const userByIdentifier = await UserModel.findOne({
-        $or: [
-          {
-            username: identifier,
-          },
-          {
-            email: identifier,
-          },
-        ],
+      const userByIdentifier = await prisma.user.findFirst({
+        where: {
+          OR: [{ username: identifier }, { email: identifier }],
+        },
       });
 
       // validasi identifier
@@ -102,8 +94,7 @@ export default {
       }
 
       const token = generateToken({
-        id: userByIdentifier._id,
-        role: userByIdentifier.role,
+        id: userByIdentifier?.id,
       });
       res.status(200).json({
         message: "Login success",
@@ -126,7 +117,7 @@ export default {
      */
     try {
       const user = req.user;
-      const result = await UserModel.findById(user?.id);
+      const result = await prisma.user.findUnique({ where: { id: user?.id } });
 
       res.status(200).json({
         message: "Success get user profile",

@@ -1,19 +1,11 @@
-import { Types } from "mongoose";
-import { User } from "../models/user.model";
 import { SECRET } from "./env";
 import jwt from "jsonwebtoken";
-export interface IUserToken
-  extends Omit<
-    User,
-    | "password"
-    | "activationCode"
-    | "isActive"
-    | "email"
-    | "fullName"
-    | "profilePicture"
-    | "username"
-  > {
-  id?: Types.ObjectId;
+import { User } from "../generated/prisma/client";
+export interface IUserToken extends Omit<
+  User,
+  "password" | "email" | "fullName" | "username"
+> {
+  id: string;
 }
 
 export const generateToken = (user: IUserToken): string => {
