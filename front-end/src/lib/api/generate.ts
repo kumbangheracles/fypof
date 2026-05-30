@@ -57,9 +57,9 @@ export async function generateFiction(
 
           if (json.text && !firstChunkLogged) {
             // waktu sampai chunk pertama muncul (TTFB)
-            console.log(
-              `⚡ First chunk: ${(performance.now() - startTime).toFixed(0)}ms`,
-            );
+            // console.log(
+            //   `⚡ First chunk: ${(performance.now() - startTime).toFixed(0)}ms`,
+            // );
             firstChunkLogged = true;
           }
 
@@ -69,9 +69,9 @@ export async function generateFiction(
           }
           if (json.done) {
             // total durasi stream selesai
-            console.log(
-              `✅ Total duration: ${(performance.now() - startTime).toFixed(0)}ms`,
-            );
+            // console.log(
+            //   `✅ Total duration: ${(performance.now() - startTime).toFixed(0)}ms`,
+            // );
             onDone();
             return;
           }
