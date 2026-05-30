@@ -5,7 +5,11 @@ import {
 } from "../validation/fiction.validation";
 import { z } from "zod";
 import { AppError } from "../middlewares/errorhandler.middleware";
-import { streamFiction } from "../services/fiction.service";
+import {
+  generateFictionCover,
+  generateFictionCoverWithText,
+  streamFiction,
+} from "../services/fiction.service";
 type FictionRequest = z.infer<typeof FormDataSchema>;
 const generateFiction = async (
   req: Request,
@@ -101,4 +105,44 @@ export default {
   },
 
   generateFiction,
+
+  async generateImage(req: Request, res: Response, next: NextFunction) {
+    try {
+      const parsed = FormDataSchema.safeParse(req.body);
+      if (!parsed.success) {
+        const message = parsed?.error?.message;
+        return next(new AppError(400, message));
+      }
+
+      const input: FictionRequest = parsed.data;
+
+      const base64Image = await generateFictionCover(input);
+
+      return res.status(200).json({ image: base64Image, message: "Success" });
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  async generateImageWithText(req: Request, res: Response, next: NextFunction) {
+    try {
+      const parsed = FormDataSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return next(new AppError(400, parsed.error.message));
+      }
+
+      const input: FictionRequest = parsed.data;
+
+      const { storyText } = req.body;
+
+      const base64Image = await generateFictionCoverWithText(
+        input,
+        storyText ?? "",
+      );
+
+      return res.status(200).json({ image: base64Image, message: "Success" });
+    } catch (err) {
+      next(err);
+    }
+  },
 };

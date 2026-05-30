@@ -13,32 +13,23 @@ import { FormDataSchema } from "@/lib/validation/formDataValidation";
 import getRandomColor from "@/lib/getRandomColor";
 import { useMounted } from "@/hooks/useMounted";
 import { HomeIndexSkeleton } from "./HomeIndexSkeleton";
-import axios from "axios";
 import { useToast } from "@/hooks/useToast";
 import { axiosInstance } from "@/lib/axiosInstance";
 import { generateFiction } from "@/lib/api/generate";
 import { OutputCard } from "./OutputCard";
-import AppSelect from "./AppSelect";
-import useFetchCountries from "@/hooks/useFetchCountries";
 import AppCountrySelect from "./AppCountrySelect";
+import OutputImage from "./OutputImage";
+import useImageSrc from "@/hooks/useImageSrc";
 
 const HomeIndex = () => {
+  useEffect(() => {
+    fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/`).catch(() => {});
+  }, []);
+
   const [listColorPalette, setListColorPalette] = useState<string[]>([
     getRandomColor(),
     getRandomColor(),
   ]);
-  const {
-    countries: dataCountries,
-    isLoading: isLoadingFetchCountry,
-    error: errorFetchCountry,
-  } = useFetchCountries();
-
-  console.log("Data country: ", dataCountries);
-
-  const mappedOptionCountris = dataCountries?.map((item) => ({
-    label: item?.name?.common,
-    value: item?.name?.common.toLowerCase().replace(" ", "_"),
-  }));
 
   const { toast } = useToast();
   const [selectedAtmosphere, setSelectedAtmosphere] = useState<string[]>([]);
@@ -53,6 +44,13 @@ const HomeIndex = () => {
     protagonist_feel: "",
     language: "",
   });
+  const {
+    coverImage: imageSrc,
+    handleGenerateCover,
+    loadingCover: loadingImageSrc,
+    setCoverImage: setImageSrc,
+    handleClearImage,
+  } = useImageSrc({ formData, setErrors });
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [color, setColor] = useState<string>(getRandomColor());
   const [loading, setLoading] = useState<boolean>(false);
@@ -135,11 +133,30 @@ const HomeIndex = () => {
   const [output, setOutput] = useState("");
   const [error, setError] = useState("");
 
-  // AbortController ref so we can cancel mid-stream if needed
   const abortRef = useRef<AbortController | null>(null);
 
   async function handleSubmit(data: FormDataTypes) {
-    // Cancel any in-flight request
+    const result = FormDataSchema.safeParse(data);
+
+    if (!result.success) {
+      setErrors(result.error.flatten().fieldErrors);
+
+      return;
+    }
+
+    const validData = result.data;
+
+    const payload = {
+      opening_sentence: validData.opening_sentence,
+      genre_and_world: validData.genre_and_world,
+      protagonist_feel: validData.protagonist_feel,
+      antagonist_feel: validData.antagonist_feel,
+      color_palette: validData.color_palette,
+      atmosphere: validData.atmosphere,
+      one_secret_story_holds: validData.one_secret_story_holds,
+      language: validData?.language,
+    };
+
     abortRef.current?.abort();
     abortRef.current = new AbortController();
 
@@ -148,14 +165,15 @@ const HomeIndex = () => {
     setLoading(true);
 
     await generateFiction(
-      data,
-      (chunk) => setOutput((prev) => prev + chunk), // append each chunk
-      () => setLoading(false), // onDone
+      payload,
+      (chunk) => setOutput((prev) => prev + chunk),
+      () => setLoading(false),
       (msg) => {
         setError(msg);
         setLoading(false);
       },
       abortRef.current.signal,
+      setLoading,
     );
   }
   const mounted = useMounted();
@@ -406,7 +424,6 @@ const HomeIndex = () => {
           />
         </div>
 
-        <OutputCard output={output} loading={loading} error={error} />
         <Button
           onClick={() => handleSubmit(formData)}
           disabled={loading}
@@ -414,6 +431,14 @@ const HomeIndex = () => {
         >
           {loading && <Loader2 size={20} className="animate-spin" />}✦ Generate
         </Button>
+
+        <OutputCard output={output} loading={loading} error={error} />
+        <OutputImage
+          handleClear={handleClearImage}
+          imageSrc={imageSrc}
+          loadingImage={loadingImageSrc}
+          handleClick={handleGenerateCover}
+        />
       </div>
     </div>
   );

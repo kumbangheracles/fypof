@@ -9,7 +9,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: "https://fypof-fe.vercel.app",
+    origin: "http://localhost:3000",
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,

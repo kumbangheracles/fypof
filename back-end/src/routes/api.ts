@@ -17,5 +17,6 @@ router.get("/auth/me", authMiddleware, authController.me);
 // Fiction
 router.post("/fiction", fictionController.createFiction);
 router.post("/fiction/generate", fictionController.generateFiction);
+router.post("/fiction/generate-image", fictionController.generateImage);
 
 export default router;

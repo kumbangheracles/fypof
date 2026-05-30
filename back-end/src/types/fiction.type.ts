@@ -7,4 +7,5 @@ export interface FormDataTypes {
   atmosphere: string[];
   one_secret_story_holds: string;
   language: string;
+  imageStyle?: string;
 }
