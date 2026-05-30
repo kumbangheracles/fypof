@@ -263,23 +263,43 @@ async function generateWithPollinations(prompt: string): Promise<string> {
   return `data:image/jpeg;base64,${base64}`;
 }
 
+// export async function generateFictionCover(
+//   input: FormDataTypes,
+// ): Promise<string> {
+//   const prompt = buildImagePrompt(input);
+
+//   try {
+//     return await generateWithHuggingFace(prompt);
+//   } catch (err: any) {
+//     if (err?.message === "ALL_HF_QUOTA_EXCEEDED") {
+//       console.warn("Semua HF model habis quota, fallback ke Pollinations...");
+//       return await generateWithPollinations(prompt);
+//     }
+//     console.error("Image generation error:", err);
+//     throw new AppError(502, "Gagal generate cover image.");
+//   }
+// }
 export async function generateFictionCover(
   input: FormDataTypes,
+  storyText: string = "",
 ): Promise<string> {
-  const prompt = buildImagePrompt(input);
+  const prompt = storyText
+    ? buildImagePromptFromText(storyText, input)
+    : buildImagePrompt(input);
+
+  if (process.env.USE_POLLINATIONS_ONLY === "true") {
+    return await generateWithPollinations(prompt);
+  }
 
   try {
     return await generateWithHuggingFace(prompt);
   } catch (err: any) {
     if (err?.message === "ALL_HF_QUOTA_EXCEEDED") {
-      console.warn("Semua HF model habis quota, fallback ke Pollinations...");
       return await generateWithPollinations(prompt);
     }
-    console.error("Image generation error:", err);
     throw new AppError(502, "Gagal generate cover image.");
   }
 }
-
 export async function generateFictionCoverWithText(
   input: FormDataTypes,
   storyText: string = "",
