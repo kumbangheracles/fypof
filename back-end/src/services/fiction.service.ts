@@ -152,13 +152,12 @@ function buildImagePromptFromText(
     atmosphere = ["melancholic"],
     color_palette,
   } = input;
-
+  console.log("Story get ===========: ", storyText);
   const moodStr = atmosphere.join(", ");
   const colorNames = (color_palette ?? ["#c9a96e", "#4a2c6e"])
     .map((hex) => hexToColorName(hex))
     .join(" and ");
 
-  // Ambil 3 kalimat pertama dari story sebagai visual anchor
   const storySummary = storyText
     .split(/[.!?]/)
     .map((s) => s.trim())
@@ -175,7 +174,6 @@ function buildImagePromptFromText(
     "cel shaded, sharp lineart",
     "no text, no words, no letters, no watermark",
 
-    // Scene dari story yang sudah digenerate
     `visualize this story scene: "${storySummary}"`,
     `genre: ${genre_and_world}`,
 
@@ -195,7 +193,7 @@ function buildImagePromptFromText(
     "professional anime studio quality",
     "sharp focus",
 
-    "no text, no typography, no letters, no numbers, no watermark, no signature, no 3D, no photorealistic",
+    "no text, no typhography, no letters, no numbers, no watermark, no signature, no 3D, no photorealistic, remember this is IMPORTANT!!",
   ]
     .filter(Boolean)
     .join(", ");
@@ -288,7 +286,7 @@ export async function generateFictionCoverWithText(
 ): Promise<string> {
   const prompt = storyText
     ? buildImagePromptFromText(storyText, input)
-    : buildImagePrompt(input); // fallback ke prompt lama kalau belum ada story
+    : buildImagePrompt(input);
 
   try {
     return await generateWithHuggingFace(prompt);

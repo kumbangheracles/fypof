@@ -37,9 +37,9 @@ const useImageSrc = ({
     try {
       let image: string = "";
 
-      if (isWithText === "yes") {
+      if (isWithText === "no") {
         image = await generateCover(formData);
-      } else if (isWithText === "no") {
+      } else if (isWithText === "yes") {
         image = await generateCoverWithText(formData, storyText);
       }
 

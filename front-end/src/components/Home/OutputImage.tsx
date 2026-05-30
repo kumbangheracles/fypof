@@ -41,8 +41,8 @@ const OutputImage = ({
             <div className="w-full min-h-[200px] overflow-hidden">
               <Image
                 src={imageSrc}
-                width={100}
-                height={100}
+                width={1000}
+                height={1000}
                 alt="Fiction cover"
                 className="w-full h-full object-contain"
               />

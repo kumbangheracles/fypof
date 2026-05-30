@@ -32,6 +32,7 @@ const HomeIndex = () => {
   ]);
 
   const { toast } = useToast();
+  const [output, setOutput] = useState("");
   const [selectedAtmosphere, setSelectedAtmosphere] = useState<string[]>([]);
   const [errors, setErrors] = useState<Record<string, string[]>>({});
   const [formData, setFormData] = useState<FormDataTypes>({
@@ -50,7 +51,12 @@ const HomeIndex = () => {
     loadingCover: loadingImageSrc,
     setCoverImage: setImageSrc,
     handleClearImage,
-  } = useImageSrc({ formData, setErrors });
+  } = useImageSrc({
+    formData,
+    setErrors,
+    isWithText: "no",
+    storyText: output,
+  });
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [color, setColor] = useState<string>(getRandomColor());
   const [loading, setLoading] = useState<boolean>(false);
@@ -130,7 +136,6 @@ const HomeIndex = () => {
       setLoading(false);
     }
   };
-  const [output, setOutput] = useState("");
   const [error, setError] = useState("");
 
   const abortRef = useRef<AbortController | null>(null);

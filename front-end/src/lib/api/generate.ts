@@ -118,7 +118,7 @@ export async function generateCoverWithText(
   formData: FormDataTypes,
   storyText: string,
 ): Promise<string> {
-  const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/fiction/generate-image`;
+  const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/fiction/generate-image-text`;
   console.log("Fetching:", url);
 
   const res = await fetch(url, {
